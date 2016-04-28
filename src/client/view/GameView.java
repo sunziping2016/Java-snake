@@ -8,10 +8,10 @@ import java.util.Observable;
 /**
  * Created by sun on 4/27/16.
  *
- * Main view of the game, also a game listener, call repaint when necessary.
+ * Main view of the game, also a game observer, call repaint when necessary.
  */
 
-public class GameStateView implements GameStateObserver {
+public class GameView implements GameStateObserver {
     private PlayerActionConsumer consumer;
 
     @Override
