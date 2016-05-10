@@ -1,5 +1,7 @@
 package common.model;
 
+import common.controller.GameStateObserver;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -10,13 +12,25 @@ import java.util.UUID;
  * Class represents the information of a room.
  */
 public class GameInfo implements Serializable {
-    public enum State {
-        WAITING,  // Wait for users to join.
-        STARTED,  // Game has already started.
-        OVER,     // Game has stopped.
-    }
-    public State state;
+    public GameState.State state;
     public UUID gameID;
     public ArrayList<UUID> userIDs;
-    public ArrayList<UUID> admin;
+    public UUID admin;
+
+    public GameInfo(GameState.State state, UUID gameID, ArrayList<UUID> userIDs, UUID admin) {
+        this.state = state;
+        this.gameID = gameID;
+        this.userIDs = userIDs;
+        this.admin = admin;
+    }
+
+    @Override
+    public String toString() {
+        return "GameInfo{" +
+                "state=" + state +
+                ", gameID=" + gameID +
+                ", userIDs=" + userIDs +
+                ", admin=" + admin +
+                '}';
+    }
 }

@@ -12,7 +12,7 @@ import java.awt.event.*;
  * Manage different view with a stack.
  */
 public class ViewManager extends JComponent implements KeyListener, WindowListener {
-    private static final float ASPECT_RATIO = Float.parseFloat(ClientPropertiesLoader.get().getProperty("ViewManageAspectRatio", "1.6f"));
+    private static final float ASPECT_RATIO = Float.parseFloat(ClientPropertiesLoader.get().getProperty("ViewManage.AspectRatio"));
 
     private JFrame frame;
     public ViewManager(JFrame frame) {

@@ -17,7 +17,7 @@ public class MainFrame extends JFrame {
 
         Container lay = getContentPane();
         lay.setLayout(new BoxLayout(lay, BoxLayout.Y_AXIS));
-        lay.setBackground(Colors.get("BackgroundColor", Colors.BACKGROUND));
+        lay.setBackground(Colors.get("MainFrame.Background", Colors.BACKGROUND));
         lay.add(Box.createVerticalGlue());
         lay.add(viewManager);
         lay.add(Box.createVerticalGlue());
