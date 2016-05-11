@@ -9,7 +9,7 @@ import java.util.function.Consumer;
  *
  * Consume the player action.
  *
- * Implemented by `GameController` and `PlayerActionSender`.
+ * Implemented by `GameController` and ``.
  */
 public interface PlayerActionConsumer extends Consumer<PlayerAction> {
 }

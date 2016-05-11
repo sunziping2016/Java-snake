@@ -19,6 +19,10 @@ public class Preference {
         return properties.getProperty(key, defaultValue);
     }
 
+    public Object setProperty(String key, String value) {
+        return properties.setProperty(key, value);
+    }
+
     public void load(String filename) {
         try (InputStream input = new FileInputStream(filename)) {
             properties.load(input);

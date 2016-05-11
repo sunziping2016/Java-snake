@@ -27,6 +27,11 @@ public class PlayerAction implements Serializable {
     public Action action;
     public UUID userID;
 
+    public PlayerAction(Action action) {
+        this.action = action;
+        this.userID = null;
+    }
+
     public PlayerAction(Action action, UUID userID) {
         this.action = action;
         this.userID = userID;

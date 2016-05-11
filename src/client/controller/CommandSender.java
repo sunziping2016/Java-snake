@@ -10,8 +10,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
 
 /**
  * Created by sun on 4/28/16.
@@ -122,6 +120,17 @@ public class CommandSender {
             outputStream.writeObject(new GameCommand(GameCommand.Command.GAME_INFO));
             outputStream.writeObject(gameID);
             return (GameInfo) CheckForException(inputStream.readObject());
+        } catch (ClassNotFoundException | IOException error) {
+            throw new RuntimeException(error.getMessage());
+        }
+    }
+
+    public GamePlayClient joinGame(UUID gameID) throws RuntimeException {
+        try {
+            outputStream.writeObject(new GameCommand(GameCommand.Command.GAME_JOIN));
+            outputStream.writeObject(gameID);
+            CheckForException(inputStream.readObject());
+            return new GamePlayClient(outputStream, inputStream);
         } catch (ClassNotFoundException | IOException error) {
             throw new RuntimeException(error.getMessage());
         }

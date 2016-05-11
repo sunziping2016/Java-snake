@@ -7,7 +7,7 @@ import java.util.Observable;
  *
  * Observable object notify `GameState` to `GameStateObserver`.
  *
- * Extends by `GameController` and `GameStateReceiver`.
+ * Extends by `GameController` and `GamePlayClient`.
  */
 public class GameStateObservable extends Observable {
 }

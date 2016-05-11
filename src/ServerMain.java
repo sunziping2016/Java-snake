@@ -1,4 +1,7 @@
 import common.controller.Preference;
+import jline.TerminalFactory;
+import jline.console.ConsoleReader;
+import jline.console.completer.StringsCompleter;
 import server.controller.GameServer;
 import server.controller.ServerPropertiesLoader;
 import server.model.Users;
@@ -17,26 +20,40 @@ public class ServerMain {
     private static final String USER_FILE = ServerPropertiesLoader.get().getProperty("ServerMain.UserFile");
     private static final int DEFAULT_PORT = Integer.parseInt(ServerPropertiesLoader.get().getProperty("ServerMain.DefaultPort"));
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        Preference.get().load(CONFIG_FILE);
-        Users users = new Users();
-        users.load(USER_FILE);
+    public static void main(String[] args) {
+        try {
+            Preference.get().load(CONFIG_FILE);
+            Users users = new Users();
+            users.load(USER_FILE);
 
-        String str = Preference.get().getProperty("port", null);
-        int port = str == null ? DEFAULT_PORT : Integer.parseInt(str);
+            String str = Preference.get().getProperty("port", null);
+            int port = str == null ? DEFAULT_PORT : Integer.parseInt(str);
 
-        GameServer gameServer = new GameServer(port, users);
-        gameServer.start();
+            GameServer gameServer = new GameServer(port, users);
+            gameServer.start();
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Type `exit` to stop the server. (type `help` to see list of commands)");
-        do {
-            System.out.print("> ");
-        } while (scanner.hasNextLine() && gameServer.process(scanner.nextLine()));
+            System.out.println("Type `exit` to stop the server. (type `help` to see list of commands)");
+            ConsoleReader console = new ConsoleReader();
+            console.addCompleter(new StringsCompleter(gameServer.getCommands()));
+            console.setPrompt("> ");
+            String line;
+            while ((line = console.readLine()) != null)
+                if (!gameServer.process(line))
+                    break;
+            if (line == null)
+                gameServer.exit();
+            gameServer.stop();
 
-        gameServer.stop();
-
-        users.save(USER_FILE);
-        Preference.get().save(CONFIG_FILE, CONFIG_FILE_COMMENT);
+            users.save(USER_FILE);
+            Preference.get().save(CONFIG_FILE, CONFIG_FILE_COMMENT);
+        } catch (Exception error) {
+            error.printStackTrace();
+        } finally {
+            try {
+                TerminalFactory.get().restore();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -1,6 +1,10 @@
 import client.controller.CommandSender;
+import client.controller.GamePlayClient;
+import common.model.PlayerAction;
 
 import java.net.Socket;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.UUID;
 
 /**
@@ -20,12 +24,19 @@ public class ClientMain {
         });*/
         try {
             CommandSender commandSender = new CommandSender(new Socket("localhost", 9797));
-            //commandSender.userRegister("sun", "1998");
             commandSender.userLogin("sun", "1998");
-            System.out.println(commandSender.userInfo(commandSender.getLoginId()));
-            commandSender.createGame();
-            //Thread.sleep(10000);
-            System.out.println(commandSender.gameInfo(commandSender.listGame().get(0)));
+            UUID gameID = commandSender.createGame();
+            GamePlayClient gamePlayClient = commandSender.joinGame(gameID);
+            gamePlayClient.addObserver((o, arg) -> {
+                System.out.println(arg);
+            });
+            gamePlayClient.start();
+            gamePlayClient.accept(new PlayerAction(PlayerAction.Action.START));
+            gamePlayClient.accept(new PlayerAction(PlayerAction.Action.UP));
+            gamePlayClient.accept(new PlayerAction(PlayerAction.Action.PAUSE));
+            Thread.sleep(10000);
+            gamePlayClient.accept(new PlayerAction(PlayerAction.Action.EXIT));
+            gamePlayClient.join();
             commandSender.deleteGame();
             commandSender.userLogout();
             commandSender.close();

@@ -27,7 +27,7 @@ public class GameCommand implements Serializable {
         GAME_DELETE,        // + Return null.
         GAME_LIST,          // - Return an ArrayList<UUID> of games.
         GAME_INFO,          // - Submit a UUID of game and return a GameInfo.
-        GAME_JOIN,          // + Submit a UUID of user and game and return a null and then pass the stream to the game.
+        GAME_JOIN,          // + Submit a UUID of game and return a null and then pass the input stream to the GamePlayClient..
     }
     public Command command;
 

@@ -28,6 +28,7 @@ public class GameState implements Serializable {
         START,
         PAUSE,
         OVER,
+        CLOSING,
     }
     public State state;
     public MapBlock[][] map;

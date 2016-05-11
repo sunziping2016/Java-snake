@@ -5,9 +5,7 @@ import common.model.GameState;
 import common.model.PlayerAction;
 
 import java.util.ArrayList;
-import java.util.Observable;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 /**
  * Created by sun on 4/27/16.
@@ -36,6 +34,16 @@ public class GameController extends GameStateObservable implements PlayerActionC
     @Override
     public void run() {
         //while ()
+        while (true) {
+            try {
+                Thread.sleep(2000);
+                setChanged();
+                notifyObservers(gameState);
+            } catch (InterruptedException error) {
+                notifyObservers(gameState);
+                break;
+            }
+        }
     }
 
     public boolean isAlive() {
@@ -52,7 +60,6 @@ public class GameController extends GameStateObservable implements PlayerActionC
     public void stop() {
         if (isAlive()) {
             thread.interrupt();
-            notifyObservers(null);
         }
     }
 
@@ -66,13 +73,36 @@ public class GameController extends GameStateObservable implements PlayerActionC
         }
     }
 
-    public void exitAllObservers() {
+    public void exit() {
+        setChanged();
         notifyObservers(null);
+        stop();
+        join();
     }
 
     @Override
     public void accept(PlayerAction playerAction) {
-
+        switch (playerAction.action) {
+            case START:
+                if (gameState.state == GameState.State.PAUSE || gameState.state == GameState.State.PREPAREING) {
+                    gameState.state = GameState.State.START;
+                    start();
+                }
+                break;
+            case PAUSE:
+                if (gameState.state == GameState.State.PAUSE) {
+                    gameState.state = GameState.State.PAUSE;
+                    stop();
+                }
+                break;
+            case UP:
+                //exit();
+                break;
+            default:
+                System.err.println("Unknown Player Action.");
+                break;
+        }
+        notifyObservers(gameState);
     }
 
     public GameState getGameState() {

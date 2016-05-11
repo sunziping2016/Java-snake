@@ -1,5 +1,6 @@
 package server.controller;
 
+import common.controller.GameController;
 import common.model.GameCommand;
 import common.model.GameInfo;
 import common.model.UserInfo;
@@ -8,6 +9,7 @@ import server.model.Users;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.UUID;
 
 /**
@@ -26,6 +28,7 @@ public class CommandReceiver implements Runnable {
     private Users users;
     private Games games;
     private UUID loginID;
+
 
     public CommandReceiver(Socket socket, Users users, Games games) {
         try {
@@ -46,6 +49,7 @@ public class CommandReceiver implements Runnable {
             UUID userID, gameID;
             UserInfo userInfo;
             GameInfo gameInfo;
+            GameController gameController;
             switch (gameCommand.command) {
                 case USER_LOGIN:
                     username = (String) inputStream.readObject();
@@ -97,6 +101,24 @@ public class CommandReceiver implements Runnable {
                     gameInfo = games.getGameInfo(gameID);
                     outputStream.writeUnshared(gameInfo);
                     break;
+                case GAME_JOIN:
+                    gameID = (UUID) inputStream.readObject();
+                    if (loginID == null)
+                        throw new RuntimeException("No user logged in");
+                    outputStream.writeObject(null);
+                    gameController = games.joinGame(loginID, gameID);
+                    try {
+                        GamePlayServer gamePlayServer = new GamePlayServer(gameController, outputStream, inputStream, loginID);
+                        gamePlayServer.start();
+                        gamePlayServer.join();
+                    } finally {
+                        try {
+                            games.leaveGame(loginID);
+                        } catch (RuntimeException error) {
+                            error.printStackTrace();
+                        }
+                    }
+                    break;
                 default:
                     System.err.println("Unknown Action");
                     break;
@@ -109,31 +131,29 @@ public class CommandReceiver implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Client connected from " + socket.getRemoteSocketAddress());
         try {
             while (true) {
                 GameCommand gameCommand = (GameCommand) inputStream.readObject();
                 if (gameCommand == null || !process(gameCommand))
                     break;
             }
-        } catch (EOFException error) {
+        } catch (EOFException | SocketException error) {
             // Do nothing
         } catch (ClassNotFoundException | IOException error) {
             error.printStackTrace();
         } finally {
-            System.out.println("Client disconnected from " + socket.getRemoteSocketAddress());
             try {
                 socket.close();
-            } catch (IOException error) {
+                if (loginID != null) {
+                    UserInfo userInfo = users.getUserInfo(loginID);
+                    if (userInfo.adminGameID != null)
+                        games.deleteGame(loginID);
+                    if (userInfo.state != UserInfo.State.OFFLINE)
+                        users.logout(loginID);
+                }
+            } catch (RuntimeException | IOException error) {
                 error.printStackTrace();
             }
-        }
-        if (loginID != null) {
-            UserInfo userInfo = users.getUserInfo(loginID);
-            if (userInfo.adminGameID != null)
-                games.deleteGame(loginID);
-            if (userInfo.state != UserInfo.State.OFFLINE)
-                users.logout(loginID);
         }
     }
 
@@ -145,12 +165,19 @@ public class CommandReceiver implements Runnable {
     }
 
     public void stop() {
-        if (thread!=null && thread.isAlive())
+        if (thread != null && thread.isAlive()) {
+            try {
+                if (!socket.isClosed())
+                    socket.close();
+            } catch (IOException error) {
+                // Do nothing.
+            }
             thread.interrupt();
+        }
     }
 
     public void join() {
-        if (thread!=null && thread.isAlive()) {
+        if (thread != null && thread.isAlive()) {
             //thread.interrupt();
             try {
                 thread.join();
@@ -158,5 +185,9 @@ public class CommandReceiver implements Runnable {
                 // Do nothing.
             }
         }
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }
