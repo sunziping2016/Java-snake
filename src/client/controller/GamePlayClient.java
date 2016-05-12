@@ -59,7 +59,7 @@ public class GamePlayClient extends GameStateObservable implements Runnable, Pla
     }
 
     @Override
-    public void accept(PlayerAction playerAction) {
+    synchronized public void accept(PlayerAction playerAction) {
         if (!alive) return;
         try {
             outputStream.writeObject(playerAction);

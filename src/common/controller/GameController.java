@@ -82,6 +82,8 @@ public class GameController extends GameStateObservable implements PlayerActionC
 
     @Override
     public void accept(PlayerAction playerAction) {
+        ArrayList<GameState.Pos> player = gameState.players.getOrDefault(playerAction.userID, null);
+        System.out.println(playerAction);
         switch (playerAction.action) {
             case START:
                 if (gameState.state == GameState.State.PAUSE || gameState.state == GameState.State.PREPAREING) {
@@ -89,6 +91,17 @@ public class GameController extends GameStateObservable implements PlayerActionC
                     start();
                 }
                 break;
+            case JOIN:
+                ArrayList<GameState.Pos> position = new ArrayList<>();
+                position.add(new GameState.Pos(5, 5));
+                gameState.players.put(playerAction.userID, position);
+                setChanged();
+                break;
+            case EXIT:
+                if (gameState.players.containsKey(playerAction.userID)) {
+                    gameState.players.remove(playerAction.userID);
+                    setChanged();
+                }
             case PAUSE:
                 if (gameState.state == GameState.State.PAUSE) {
                     gameState.state = GameState.State.PAUSE;
@@ -96,7 +109,28 @@ public class GameController extends GameStateObservable implements PlayerActionC
                 }
                 break;
             case UP:
-                //exit();
+                if (player != null) {
+                    --player.get(0).y;
+                    setChanged();
+                }
+                break;
+            case DOWN:
+                if (player != null) {
+                    ++player.get(0).y;
+                    setChanged();
+                }
+                break;
+            case LEFT:
+                if (player != null) {
+                    --player.get(0).x;
+                    setChanged();
+                }
+                break;
+            case RIGHT:
+                if (player != null) {
+                    ++player.get(0).x;
+                    setChanged();
+                }
                 break;
             default:
                 System.err.println("Unknown Player Action.");

@@ -15,4 +15,5 @@ This game is distributed under [BSD license](https://opensource.org/licenses/BSD
 
 ## Copyright
 Copyright (c) 2016, Sun Ziping
+
 All rights reserved.

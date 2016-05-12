@@ -34,13 +34,14 @@ public class GamePlayServer implements GameStateObserver, Runnable{
     }
 
     @Override
-    public void update(Observable o, Object arg) {
+    synchronized public void update(Observable o, Object arg) {
         // assert arg instanceof GameState;
         if (!alive) return;
         GameState gameState = (GameState) arg;
         try {
             if (arg == null)
                 alive = false;
+            System.out.println(gameState);
             outputStream.writeUnshared(gameState);
         } catch (IOException error) {
             error.printStackTrace();
@@ -53,6 +54,9 @@ public class GamePlayServer implements GameStateObserver, Runnable{
         try {
             while (true) {
                 PlayerAction playerAction = (PlayerAction) inputStream.readObject();
+
+                playerAction.userID = userID;
+                gameController.accept(playerAction);
                 if (playerAction.action == PlayerAction.Action.EXIT) {
                     if (alive) {
                         update(gameController, null);
@@ -60,8 +64,6 @@ public class GamePlayServer implements GameStateObserver, Runnable{
                     }
                     break;
                 }
-                playerAction.userID = userID;
-                gameController.accept(playerAction);
             }
         } catch (EOFException | SocketException error) {
             // Do nothing

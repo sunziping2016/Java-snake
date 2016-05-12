@@ -15,11 +15,17 @@ import java.util.zip.GZIPOutputStream;
  * player, map(wall), apple, gamestate, gameMessage
  */
 public class GameState implements Serializable {
-    public static class Pos {
-        int x, y;
+    public static class Pos implements Serializable {
+        public int x, y;
+        public Pos() {
+            x = y = 0;
+        }
+        public Pos(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
     }
     public enum MapBlock {
-        NOTHING,
         WALL,
         WALKABLE,
     }
@@ -32,10 +38,10 @@ public class GameState implements Serializable {
     }
     public State state;
     public MapBlock[][] map;
-    public HashMap<UUID, ArrayList<ArrayList<Pos>>> players;
+    public HashMap<UUID, ArrayList<Pos>> players;
     public ArrayList<Pos> apples;
 
-    public GameState(State state, MapBlock[][] map, HashMap<UUID, ArrayList<ArrayList<Pos>>> players, ArrayList<Pos> apples) {
+    public GameState(State state, MapBlock[][] map, HashMap<UUID, ArrayList<Pos>> players, ArrayList<Pos> apples) {
         this.state = state;
         this.map = map;
         this.players = players;
@@ -72,7 +78,7 @@ public class GameState implements Serializable {
         ObjectInputStream objectInputStream = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(compValue)));
         state = (State) objectInputStream.readObject();
         map = (MapBlock[][]) objectInputStream.readObject();
-        players = (HashMap<UUID, ArrayList<ArrayList<Pos>>>) objectInputStream.readObject();
+        players = (HashMap<UUID, ArrayList<Pos>>) objectInputStream.readObject();
         apples = (ArrayList<Pos>) objectInputStream.readObject();
         objectInputStream.close();
     }

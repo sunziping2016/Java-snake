@@ -1,10 +1,10 @@
 package client.view;
 
-import client.controller.ClientPropertiesLoader;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.EmptyStackException;
+import java.util.Stack;
 
 /**
  * Created by sun on 4/28/16.
@@ -12,7 +12,9 @@ import java.awt.event.*;
  * Manage different view with a stack.
  */
 public class ViewManager extends JComponent implements KeyListener, WindowListener {
-    private static final float ASPECT_RATIO = Float.parseFloat(ClientPropertiesLoader.get().getProperty("ViewManage.AspectRatio"));
+    public static final float ASPECT_RATIO = GraphicsWrapper.WIDTH / GraphicsWrapper.HEIGHT;
+
+    private Stack<View> views = new Stack<>();
 
     private JFrame frame;
     public ViewManager(JFrame frame) {
@@ -23,25 +25,68 @@ public class ViewManager extends JComponent implements KeyListener, WindowListen
             private GraphicsDevice fullscreenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
             @Override
             public void actionPerformed(ActionEvent e) {
-                ViewManager.this.frame.dispose();
-                ViewManager.this.frame.setVisible(false);
-                if (ViewManager.this.frame.isUndecorated()) {
+                frame.dispose();
+                frame.setVisible(false);
+                if (frame.isUndecorated()) {
                     fullscreenDevice.setFullScreenWindow(null);
-                    ViewManager.this.frame.setUndecorated(false);
+                    frame.setAlwaysOnTop(false);
+                    frame.setUndecorated(false);
                 } else {
-                    ViewManager.this.frame.setUndecorated(true);
-                    fullscreenDevice.setFullScreenWindow(ViewManager.this.frame);
+                    frame.setUndecorated(true);
+                    frame.setAlwaysOnTop(true);
+                    fullscreenDevice.setFullScreenWindow(frame);
                 }
-                ViewManager.this.frame.setVisible(true);
-                ViewManager.this.frame.repaint();
+                frame.setVisible(true);
+                frame.repaint();
             }
         });
+    }
+
+    public View getActiveView() {
+        try {
+            return views.peek();
+        } catch (EmptyStackException error) {
+            return null;
+        }
+    }
+
+    public synchronized void pushView(View view, Content content) {
+        content.putString("method", "push");
+        content.putObject("parent", getActiveView());
+        View activeView = getActiveView();
+        if (activeView != null)
+            activeView.onStop();
+        view.setViewManager(this);
+        view.onStart(content);
+        views.push(view);
+        repaint();
+    }
+
+    public synchronized View popView(Content content) {
+        content.putString("method", "pop");
+        View popped;
+        try {
+            popped = views.pop();
+        } catch (EmptyStackException error) {
+            return null;
+        }
+        if (popped != null) {
+            popped.onStop();
+            popped.setViewManager(null);
+        }
+        View activeView = getActiveView();
+        if (activeView != null)
+            activeView.onStart(content);
+        repaint();
+        return popped;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.clearRect(0, 0, getWidth(), getHeight());
+        View activeView = getActiveView();
+        if (activeView != null)
+            activeView.onPaint(g);
     }
 
     public Dimension getPreferredSize() {
@@ -69,7 +114,11 @@ public class ViewManager extends JComponent implements KeyListener, WindowListen
     @Override
     public void keyTyped(KeyEvent e) { }
     @Override
-    public void keyPressed(KeyEvent e) { }
+    public void keyPressed(KeyEvent e) {
+        View activeView = getActiveView();
+        if (activeView != null)
+            activeView.onKey(e.getKeyCode());
+    }
 
     @Override
     public void windowActivated(WindowEvent e) { }
