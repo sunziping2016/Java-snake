@@ -83,7 +83,7 @@ public class GameController extends GameStateObservable implements PlayerActionC
     @Override
     public void accept(PlayerAction playerAction) {
         ArrayList<GameState.Pos> player = gameState.players.getOrDefault(playerAction.userID, null);
-        System.out.println(playerAction);
+        //System.out.println(playerAction);
         switch (playerAction.action) {
             case START:
                 if (gameState.state == GameState.State.PAUSE || gameState.state == GameState.State.PREPAREING) {

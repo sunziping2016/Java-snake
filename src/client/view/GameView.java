@@ -32,7 +32,7 @@ public class GameView extends View implements GameStateObserver {
 
     @Override
     public void update(Observable o, Object arg) {
-        System.out.println(arg);
+        //System.out.println(arg);
         gameState = (GameState) arg;
         if (gameState == null)
             getViewManager().popView(new Content());

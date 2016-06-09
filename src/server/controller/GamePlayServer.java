@@ -41,7 +41,7 @@ public class GamePlayServer implements GameStateObserver, Runnable{
         try {
             if (arg == null)
                 alive = false;
-            System.out.println(gameState);
+            //System.out.println(gameState);
             outputStream.writeUnshared(gameState);
         } catch (IOException error) {
             error.printStackTrace();

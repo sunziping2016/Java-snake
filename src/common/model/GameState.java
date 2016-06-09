@@ -36,15 +36,28 @@ public class GameState implements Serializable {
         OVER,
         CLOSING,
     }
+    public enum Orientation {
+        UP,
+        RIGHT,
+        DOWN,
+        LEFT,
+    }
     public State state;
     public MapBlock[][] map;
     public HashMap<UUID, ArrayList<Pos>> players;
+    public HashMap<UUID, Orientation> orientations;
+    public HashMap<UUID, Integer> lengths;
+    public HashMap<UUID, Integer> scores;
     public ArrayList<Pos> apples;
 
-    public GameState(State state, MapBlock[][] map, HashMap<UUID, ArrayList<Pos>> players, ArrayList<Pos> apples) {
+    public GameState(State state, MapBlock[][] map, HashMap<UUID, ArrayList<Pos>> players, HashMap<UUID, Orientation> orientations,
+                     HashMap<UUID, Integer> lengths, HashMap<UUID, Integer> scores, ArrayList<Pos> apples) {
         this.state = state;
         this.map = map;
         this.players = players;
+        this.orientations = orientations;
+        this.lengths = lengths;
+        this.scores = scores;
         this.apples = apples;
     }
 
