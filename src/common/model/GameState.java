@@ -24,6 +24,24 @@ public class GameState implements Serializable {
             this.x = x;
             this.y = y;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Pos pos = (Pos) o;
+
+            return x == pos.x && y == pos.y;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = x;
+            result = 31 * result + y;
+            return result;
+        }
     }
     public enum MapBlock {
         WALL,
@@ -37,11 +55,17 @@ public class GameState implements Serializable {
         CLOSING,
     }
     public enum Orientation {
-        UP,
         RIGHT,
         DOWN,
         LEFT,
+        UP,
     }
+    public static final int [][]DIRECTIONS = new int[][] {
+            new int[] {  1 ,  0 },
+            new int[] {  0 ,  1 },
+            new int[] { -1 ,  0 },
+            new int[] {  0 , -1 },
+    };
     public State state;
     public MapBlock[][] map;
     public HashMap<UUID, ArrayList<Pos>> players;
