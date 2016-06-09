@@ -16,6 +16,8 @@ public class GameFactory {
     private static final int WALL_COUNTS = Integer.parseInt(CommonPropertiesLoader.get().getProperty("GameFactory.WallCount"));
     private static final int WALL_LENGTH = Integer.parseInt(CommonPropertiesLoader.get().getProperty("GameFactory.WallLength"));
 
+    private static final float WALL_STRAIGHT_POSSIBILITY = Float.parseFloat(CommonPropertiesLoader.get().getProperty("GameFactory.WallStraightPossibility"));
+
     public static GameState.MapBlock[][] createMap(int width, int height) {
         GameState.MapBlock[][] map;
         outer:
@@ -32,24 +34,24 @@ public class GameFactory {
             }
             Random rand = new Random();
             for (int i = 0; i < WALL_COUNTS; ++i) {
-                int x = rand.nextInt(MAP_WIDTH), y = rand.nextInt(MAP_HEIGHT);
+                int x = rand.nextInt(width), y = rand.nextInt(height);
                 int direction = -1;
                 map[y][x] = GameState.MapBlock.WALL;
                 for (int j = 0; j < WALL_LENGTH; ++j) {
                     ArrayList<Integer> directions = new ArrayList<>();
                     for (int k = 0; k < GameState.DIRECTIONS.length; ++k) {
-                        if (x + GameState.DIRECTIONS[k][0] < 0 || x + GameState.DIRECTIONS[k][0] >= MAP_WIDTH || y + GameState.DIRECTIONS[k][1] < 0 || y + GameState.DIRECTIONS[k][1] >= MAP_HEIGHT)
+                        if (x + GameState.DIRECTIONS[k][0] < 0 || x + GameState.DIRECTIONS[k][0] >= width || y + GameState.DIRECTIONS[k][1] < 0 || y + GameState.DIRECTIONS[k][1] >= height)
                             continue;
                         if (map[y + GameState.DIRECTIONS[k][1]][x + GameState.DIRECTIONS[k][0]] == GameState.MapBlock.WALKABLE)
                             directions.add(directions.size(), k);
                     }
                     if (directions.size() < 3)
                         break;
-                    if (direction >= 0 && x + GameState.DIRECTIONS[direction][0] >= 0 && x + GameState.DIRECTIONS[direction][0] < MAP_WIDTH &&
-                            y + GameState.DIRECTIONS[direction][1] >= 0 && y + GameState.DIRECTIONS[direction][1] < MAP_HEIGHT &&
+                    if (direction >= 0 && x + GameState.DIRECTIONS[direction][0] >= 0 && x + GameState.DIRECTIONS[direction][0] < width &&
+                            y + GameState.DIRECTIONS[direction][1] >= 0 && y + GameState.DIRECTIONS[direction][1] < height &&
                             map[y + GameState.DIRECTIONS[direction][1]][x + GameState.DIRECTIONS[direction][0]] == GameState.MapBlock.WALL)
                         break;
-                    if (!directions.contains(direction) || Math.random() > 0.94)
+                    if (!directions.contains(direction) || Math.random() > WALL_STRAIGHT_POSSIBILITY)
                         direction = directions.get(rand.nextInt(directions.size()));
                     x += GameState.DIRECTIONS[direction][0];
                     y += GameState.DIRECTIONS[direction][1];
@@ -59,7 +61,7 @@ public class GameFactory {
                 }
             }
             // Check connectivity
-            GameState.MapBlock[][] connectivity = new GameState.MapBlock[MAP_HEIGHT][MAP_WIDTH];
+            GameState.MapBlock[][] connectivity = new GameState.MapBlock[height][width];
             for (int i = 0; i < height; ++i)
                 for (int j = 0; j < width; ++j)
                     if (map[i][j] != GameState.MapBlock.WALKABLE)
@@ -68,8 +70,8 @@ public class GameFactory {
                         connectivity[i][j] = GameState.MapBlock.WALKABLE;
             int x, y;
             do {
-                x = rand.nextInt(MAP_WIDTH);
-                y = rand.nextInt(MAP_HEIGHT);
+                x = rand.nextInt(width);
+                y = rand.nextInt(height);
             } while(connectivity[y][x] != GameState.MapBlock.WALKABLE);
             ArrayDeque<GameState.Pos> queue = new ArrayDeque<>();
             queue.push(new GameState.Pos(x, y));
@@ -81,7 +83,7 @@ public class GameFactory {
                 for (int i = 0; i < GameState.DIRECTIONS.length; ++i) {
                     int newX = pos.x + GameState.DIRECTIONS[i][0];
                     int newY = pos.y + GameState.DIRECTIONS[i][1];
-                    if (newX >= 0 && newX < MAP_WIDTH && newY >=0 && newY < MAP_HEIGHT && connectivity[newY][newX] != GameState.MapBlock.WALL)
+                    if (newX >= 0 && newX < width && newY >=0 && newY < height && connectivity[newY][newX] != GameState.MapBlock.WALL)
                         queue.push(new GameState.Pos(newX, newY));
                 }
             }

@@ -96,6 +96,9 @@ public class GameState implements Serializable {
         objectOutputStream.writeObject(state);
         objectOutputStream.writeObject(map);
         objectOutputStream.writeObject(players);
+        objectOutputStream.writeObject(orientations);
+        objectOutputStream.writeObject(lengths);
+        objectOutputStream.writeObject(scores);
         objectOutputStream.writeObject(apples);
         objectOutputStream.close();
 
@@ -116,6 +119,9 @@ public class GameState implements Serializable {
         state = (State) objectInputStream.readObject();
         map = (MapBlock[][]) objectInputStream.readObject();
         players = (HashMap<UUID, ArrayList<Pos>>) objectInputStream.readObject();
+        orientations = (HashMap<UUID, Orientation>) objectInputStream.readObject();
+        lengths = (HashMap<UUID, Integer>) objectInputStream.readObject();
+        scores = (HashMap<UUID, Integer>) objectInputStream.readObject();
         apples = (ArrayList<Pos>) objectInputStream.readObject();
         objectInputStream.close();
     }

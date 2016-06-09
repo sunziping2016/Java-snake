@@ -80,7 +80,7 @@ public class GameView extends View implements GameStateObserver {
             }
             for (GameState.Pos apple: gameState.apples) {
                 g2.fillCircle(paddingLeft + apple.x * blockSize + blockSize / 2,
-                        paddingUp + apple.y * blockSize + blockSize / 2, blockSize / 2, Color.RED);
+                        paddingUp + apple.y * blockSize + blockSize / 2, blockSize / 2, Color.GREEN);
             }
         }
     }
