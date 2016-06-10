@@ -1,9 +1,6 @@
 import client.controller.CommandSender;
 import client.controller.GamePlayClient;
-import client.view.Content;
-import client.view.GameView;
-import client.view.LoginDialog;
-import client.view.MainFrame;
+import client.view.*;
 import common.model.PlayerAction;
 
 import java.net.Socket;
@@ -27,26 +24,7 @@ public class ClientMain {
 
                 }
             });
-
-            CommandSender commandSender = new CommandSender(new Socket("localhost", 9797));
-            commandSender.userLogin("sun", "1998");
-            UUID gameID = commandSender.createGame();
-            GamePlayClient gamePlayClient = commandSender.joinGame(gameID);
-            GameView gameView = new GameView(gamePlayClient);
-            gamePlayClient.addObserver(gameView);
-            mainFrame.pushView(gameView, new Content());
-            gamePlayClient.start();
-            gamePlayClient.accept(new PlayerAction(PlayerAction.Action.JOIN));
-            gamePlayClient.accept(new PlayerAction(PlayerAction.Action.START));
-            Thread.sleep(20000);
-            //LoginDialog loginDialog = new LoginDialog(mainFrame, "sun", "1998");
-            //loginDialog.setVisible(true);
-            gamePlayClient.accept(new PlayerAction(PlayerAction.Action.PAUSE));
-            gamePlayClient.accept(new PlayerAction(PlayerAction.Action.EXIT));
-            gamePlayClient.join();
-            commandSender.deleteGame();
-            commandSender.userLogout();
-            commandSender.close();
+            mainFrame.pushView(new SplashView(), new Content());
         } catch (Exception error) {
             error.printStackTrace();
         }

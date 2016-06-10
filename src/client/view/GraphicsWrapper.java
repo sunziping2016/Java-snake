@@ -24,9 +24,12 @@ public class GraphicsWrapper {
 
     private Graphics2D g2;
     private LinkedList<Graphics2D> transformStack = new LinkedList<>();
+    private int width, height;
 
     public GraphicsWrapper(Graphics g, int width, int height) {
         this.g2 = (Graphics2D) g.create();
+        this.width = width;
+        this.height = height;
 
         //enable antialiasing
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -138,136 +141,13 @@ public class GraphicsWrapper {
         );
     }
 
-    /*public void maskCircle(float x, float y, float radius) {
-        addTransform();
-        float scale = PRECISION_FACTOR;
-        x -= radius;
-        y -= radius;
-        Area a = new Area(g2.getClip());
-        a.subtract(new Area(new Ellipse2D.Float(x * scale, y * scale, scale * radius * 2, scale * radius * 2)));
-        g2.setClip(a);
-    }*/
-    /*public void drawImage(String imgName, float x, float y) {
-        drawImage(imgName, x, y, true);
-    }*/
-    /*//if useInstanceCache is false, do the rotate transform here, not at the instance cache level
-    //this is desirable if the image will be rotated often (i.e. on a body) to avoid running out of memory by filling up the instance cache
-    public void drawImage(String imgName, float x, float y, boolean useInstanceCache) {
-
-        float scale = PRECISION_FACTOR;
-        float scaleX = ((float)canvas.getWidth()) / (16.0f * scale);
-        float scaleY = ((float)canvas.getHeight()) / (10.0f * scale);
-        float rotation = transformStack.peek().cumRotation;
-
-        float cumTransX = (float)(g2.getTransform().getTranslateX() - originalGraphics.getTransform().getTranslateX());
-        float cumTransY = (float)(g2.getTransform().getTranslateY() - originalGraphics.getTransform().getTranslateY());
-        float realX = (x / 16f) * canvas.getWidth() + cumTransX;
-        float realY = (y / 10f) * canvas.getHeight() + cumTransY;
-
-        if (!useInstanceCache) {
-
-            BufferedImage image = ImageManager.getImage(imgName);
-            float defaultScale = ImageManager.getDefaultScale(imgName);
-
-            AffineTransform tform = new AffineTransform();
-            tform.concatenate(AffineTransform.getTranslateInstance(realX, realY));
-            tform.concatenate(AffineTransform.getTranslateInstance(-image.getWidth()*scaleX*0.5f, -image.getHeight()*scaleY*0.5f));
-            tform.concatenate(AffineTransform.getScaleInstance(scaleX*defaultScale, scaleY*defaultScale));
-            if (rotation != 0)
-                tform.concatenate(AffineTransform.getRotateInstance(rotation / 180f * Math.PI, image.getWidth()*0.5f, image.getHeight()*0.5f));
-
-            originalGraphics.drawImage(image, tform, null);
-
-        } else {
-
-            Image inst = ImageManager.getImageInstance(imgName, scaleX, scaleY, 0);
-            AffineTransform tf = new AffineTransform();
-            tf.concatenate(AffineTransform.getTranslateInstance(realX - inst.getWidth(null)/2f/ImageManager.REAL_DENSITY, realY - inst.getHeight(null)/2f/ImageManager.REAL_DENSITY));
-            if (ImageManager.REAL_DENSITY != 1.0f)
-                tf.concatenate(AffineTransform.getScaleInstance(1/ImageManager.REAL_DENSITY, 1/ImageManager.REAL_DENSITY));
-            originalGraphics.drawImage(inst, tf, null);
-        }
-    }*/
-    /*
-    public void fillBall(float x, float y, float radius, Color c) {
-        final float RATE = 0.8f;
-        float scale = PRECISION_FACTOR;
-        float[] dist = {0.0f, 1.0f};
-        float sqrtr = (float) (radius / Math.sqrt(2));
-        Color[] colors = {Colors.mixtue(Color.BLACK, c, RATE), Colors.mixtue(Color.WHITE, c, RATE)};
-        g2.setPaint(new LinearGradientPaint((x - sqrtr) * scale, (y + sqrtr) * scale,
-                (x + sqrtr) * scale, (y - sqrtr) * scale, dist, colors));
-        x -= radius;
-        y -= radius;
-        g2.fillOval(
-                (int)Math.round(x * scale),
-                (int)Math.round(y * scale),
-                (int)Math.round(2 * radius * scale),
-                (int)Math.round(2 * radius * scale)
-        );
+    public void drawImage(String imgName, float x, float y) {
+        float scaleX = ((float) width) / (WIDTH * PRECISION_FACTOR);
+        float scaleY = ((float) height) / (HEIGHT * PRECISION_FACTOR);
+        Image inst = ImageManager.getImage(imgName);
+        g2.drawImage(inst, Math.round(x * PRECISION_FACTOR), Math.round(y * PRECISION_FACTOR),
+                Math.round(inst.getWidth(null) * ImageManager.getDefaultScale(imgName)),
+                Math.round(inst.getHeight(null) * ImageManager.getDefaultScale(imgName)),
+                null);
     }
-
-    public void fillBoundary(float leftupx, float leftupy, float rightbuttomx, float rightbuttomy, float width, Color c) {
-        float scale = PRECISION_FACTOR;
-        final float RATE = 0.6f;
-        int[] xPoints, yPoints;
-        float[] dist = {0.0f, 1.0f};
-        Color[] colors = {Colors.mixtue(Color.BLACK, c, RATE), Colors.mixtue(Color.WHITE, c, RATE)};
-        xPoints = new int[] {
-                (int)Math.round((leftupx - width) * scale),
-                (int)Math.round((leftupx - width) * scale),
-                (int)Math.round(leftupx * scale),
-                (int)Math.round(leftupx * scale),
-        };
-        yPoints = new int[] {
-                (int)Math.round((leftupy - width) * scale),
-                (int)Math.round((rightbuttomy + width) * scale),
-                (int)Math.round(rightbuttomy * scale),
-                (int)Math.round(leftupy * scale),
-        };
-        g2.setPaint(new LinearGradientPaint((leftupx - width) * scale, 0.0f, leftupx * scale, 0.0f, dist, colors));
-        g2.fillPolygon(xPoints, yPoints, 4);
-        xPoints = new int[] {
-                (int)Math.round(leftupx * scale),
-                (int)Math.round((leftupx - width) * scale),
-                (int)Math.round((rightbuttomx + width) * scale),
-                (int)Math.round(rightbuttomx * scale),
-        };
-        yPoints = new int[] {
-                (int)Math.round(rightbuttomy * scale),
-                (int)Math.round((rightbuttomy + width) * scale),
-                (int)Math.round((rightbuttomy + width) * scale),
-                (int)Math.round(rightbuttomy * scale),
-        };
-        g2.setPaint(new LinearGradientPaint(0.0f, (rightbuttomy + width) * scale, 0.0f, rightbuttomy * scale, dist, colors));
-        g2.fillPolygon(xPoints, yPoints, 4);
-        xPoints = new int[] {
-                (int)Math.round(rightbuttomx * scale),
-                (int)Math.round(rightbuttomx * scale),
-                (int)Math.round((rightbuttomx + width) * scale),
-                (int)Math.round((rightbuttomx + width) * scale),
-        };
-        yPoints = new int[] {
-                (int)Math.round(leftupy * scale),
-                (int)Math.round(rightbuttomy * scale),
-                (int)Math.round((rightbuttomy + width) * scale),
-                (int)Math.round((leftupy - width) * scale),
-        };
-        g2.setPaint(new LinearGradientPaint((rightbuttomx + width) * scale, 0.0f, rightbuttomx * scale, 0.0f, dist, colors));
-        g2.fillPolygon(xPoints, yPoints, 4);
-        xPoints = new int[] {
-                (int)Math.round((leftupx - width) * scale),
-                (int)Math.round(leftupx * scale),
-                (int)Math.round(rightbuttomx * scale),
-                (int)Math.round((rightbuttomx + width) * scale),
-        };
-        yPoints = new int[] {
-                (int)Math.round((leftupy - width) * scale),
-                (int)Math.round(leftupy * scale),
-                (int)Math.round(leftupy * scale),
-                (int)Math.round((leftupy - width) * scale),
-        };
-        g2.setPaint(new LinearGradientPaint(0.0f, (leftupy - width) * scale, 0.0f, leftupy * scale, dist, colors));
-        g2.fillPolygon(xPoints, yPoints, 4);
-    } */
 }

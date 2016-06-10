@@ -104,7 +104,9 @@ public class GameController extends GameStateObservable implements PlayerActionC
         while (true) {
             try {
                 Thread.sleep(INTERVAL);
-                Set<UUID> players = gameState.players.keySet();
+                ArrayList<UUID> players = new ArrayList<>();
+                for (UUID player: gameState.players.keySet())
+                    players.add(player);
                 for (UUID player: players) {
                     step(player);
                     if (gameState.players.containsKey(player))
@@ -231,35 +233,32 @@ public class GameController extends GameStateObservable implements PlayerActionC
                 }
                 break;
             case UP:
-                if (gameState.players.containsKey(playerAction.userID)) {
+                if (gameState.players.containsKey(playerAction.userID) && gameState.state == GameState.State.START) {
                     gameState.orientations.replace(playerAction.userID, GameState.Orientation.UP);
                     step(playerAction.userID);
                     setChanged();
                 }
                 break;
             case DOWN:
-                if (gameState.players.containsKey(playerAction.userID)) {
+                if (gameState.players.containsKey(playerAction.userID) && gameState.state == GameState.State.START) {
                     gameState.orientations.replace(playerAction.userID, GameState.Orientation.DOWN);
                     step(playerAction.userID);
                     setChanged();
                 }
-
                 break;
             case LEFT:
-                if (gameState.players.containsKey(playerAction.userID)) {
+                if (gameState.players.containsKey(playerAction.userID) && gameState.state == GameState.State.START) {
                     gameState.orientations.replace(playerAction.userID, GameState.Orientation.LEFT);
                     step(playerAction.userID);
                     setChanged();
                 }
-
                 break;
             case RIGHT:
-                if (gameState.players.containsKey(playerAction.userID)) {
+                if (gameState.players.containsKey(playerAction.userID) && gameState.state == GameState.State.START) {
                     gameState.orientations.replace(playerAction.userID, GameState.Orientation.RIGHT);
                     step(playerAction.userID);
                     setChanged();
                 }
-
                 break;
             default:
                 System.err.println("Unknown Player Action.");

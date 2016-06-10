@@ -24,6 +24,7 @@ public class GameView extends View implements GameStateObserver {
 
     private PlayerActionConsumer consumer;
     private GameState gameState;
+    private boolean admin = false;
 
     public GameView(PlayerActionConsumer consumer) {
         super("game");
@@ -32,12 +33,16 @@ public class GameView extends View implements GameStateObserver {
 
     @Override
     public void update(Observable o, Object arg) {
-        //System.out.println(arg);
+        System.out.println(arg);
         gameState = (GameState) arg;
-        if (gameState == null)
-            getViewManager().popView(new Content());
-        else
+        if (gameState == null) {
+            if (getViewManager() != null)
+                getViewManager().popView(new Content());
+        } else {
+            if (gameState.players.size() == 2)
+                consumer.accept(new PlayerAction(PlayerAction.Action.START));
             repaint();
+        }
     }
 
     @Override
@@ -87,12 +92,15 @@ public class GameView extends View implements GameStateObserver {
 
     @Override
     public void onStart(Content content) {
-
+        consumer.accept(new PlayerAction(PlayerAction.Action.JOIN));
+        if (content.getInt("admin", 0) == 1)
+            admin = true;
+        //consumer.accept(new PlayerAction(PlayerAction.Action.START));
     }
 
     @Override
     public void onStop() {
-
+        consumer.accept(new PlayerAction(PlayerAction.Action.EXIT));
     }
 
     @Override
@@ -111,6 +119,8 @@ public class GameView extends View implements GameStateObserver {
             case KeyEvent.VK_RIGHT:
                 consumer.accept(new PlayerAction(PlayerAction.Action.RIGHT));
                 break;
+            case KeyEvent.VK_ESCAPE:
+                getViewManager().popView(new Content());
             default:
                 break;
         }

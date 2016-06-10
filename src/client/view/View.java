@@ -52,6 +52,7 @@ abstract public class View {
     }
 
     public void repaint() {
-        viewManager.repaint();
+        if (viewManager != null)
+            viewManager.repaint();
     }
 }

@@ -105,6 +105,10 @@ public class ViewManager extends JComponent implements KeyListener, WindowListen
     public Dimension getMaximumSize() { return getPreferredSize(); }
     public Dimension getMinimumSize() { return getPreferredSize(); }
 
+    public JFrame getFrame() {
+        return frame;
+    }
+
     public void close() {
         frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
     }
